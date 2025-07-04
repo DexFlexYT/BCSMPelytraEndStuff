@@ -1,51 +1,31 @@
 package org.dexflex.bcsmpelytrarebalance;
 
-import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.event.player.UseItemCallback;
-import net.fabricmc.fabric.api.object.builder.v1.block.FabricBlockSettings;
-import net.minecraft.block.Block;
 import net.minecraft.entity.ItemEntity;
-import net.minecraft.item.BlockItem;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.Registry;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.math.random.Random;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
 public class BCSMPElytraRebalance implements ModInitializer {
 
 	public static final String MOD_ID = "bcsmpelytrarebalance";
-
-	public static final Item SKYGLEAM = Registry.register(
-			Registries.ITEM,
-			new Identifier(MOD_ID, "skygleam"),
-			new SkygleamItem(new Item.Settings())
-	);
-
-	public static final Block SKYLIGHT_BLOCK = Registry.register(
-			Registries.BLOCK,
-			new Identifier(MOD_ID, "skylight"),
-			new SkylightBlock(FabricBlockSettings.create().strength(0.3f).luminance(15).nonOpaque())
-	);
+	public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 
 
-	public static final Item SKYLIGHT_ITEM = Registry.register(
-			Registries.ITEM,
-			new Identifier(MOD_ID, "skylight"),
-			new BlockItem(SKYLIGHT_BLOCK, new Item.Settings())
-	);
 
 	@Override
 	public void onInitialize() {
+		ModItems.registerModItems();
+
 		UseItemCallback.EVENT.register((player, world, hand) -> {
 			if (!world.isClient && player.isFallFlying() && player.getStackInHand(hand).getItem() == Items.FIREWORK_ROCKET) {
 				player.sendMessage(Text.literal("You can't use rockets while flying!"), true);
@@ -72,7 +52,7 @@ public class BCSMPElytraRebalance implements ModInitializer {
 			double z = player.getZ() + (random.nextDouble() * 20.0) - 10.0;
 			double y = 256.0;  // Fixed Y level
 
-			ItemStack stack = new ItemStack(SKYGLEAM);
+			ItemStack stack = new ItemStack(ModItems.SKYGLEAM);
 			ItemEntity drop = new ItemEntity(serverWorld, x, y, z, stack);
 			drop.setVelocity(0, -5.0, 0);
 			serverWorld.spawnEntity(drop);
