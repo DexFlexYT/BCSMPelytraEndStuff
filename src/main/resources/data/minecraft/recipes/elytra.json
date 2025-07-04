@@ -1,0 +1,23 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+        "P/P",
+        "PSP",
+        "P P"
+    ],
+    "key": {
+        "/": {
+            "item": "minecraft:end_rod"
+        },
+        "P": {
+            "item": "minecraft:phantom_membrane"
+        },
+        "S": {
+            "item": "bcsmpelytrarebalance:skygleam"
+        }
+    },
+    "result": {
+        "item": "minecraft:elytra",
+        "count": 1
+    }
+}

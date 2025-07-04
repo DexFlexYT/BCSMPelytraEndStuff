@@ -1,0 +1,37 @@
+{
+	"schemaVersion": 1,
+	"id": "bcsmpelytrarebalance",
+	"version": "${version}",
+	"name": "BCSMP Elytra Rebalance",
+	"description": "Locks the end dimension, makes elytras craftable, and adds a silly light source block",
+	"authors": [
+		"DexFlex_YT"
+	],
+	"contact": {
+		"homepage": "https://fabricmc.net/",
+		"sources": "https://github.com/FabricMC/fabric-example-mod"
+	},
+	"license": "CC0-1.0",
+	"icon": "assets/bcsmpelytrarebalance/icon.png",
+	"environment": "*",
+	"entrypoints": {
+		"main": [
+			"org.dexflex.bcsmpelytrarebalance.BCSMPElytraRebalance"
+		],
+		"client": [
+			"org.dexflex.bcsmpelytrarebalance.client.BCSMPElytraRebalanceClient"
+		]
+	},
+	"mixins": [
+		"bcsmpelytrarebalance.mixins.json"
+	],
+	"depends": {
+		"fabricloader": ">=0.16.10",
+		"minecraft": "~1.20.1",
+		"java": ">=17",
+		"fabric-api": "*"
+	},
+	"suggests": {
+		"another-mod": "*"
+	}
+}
