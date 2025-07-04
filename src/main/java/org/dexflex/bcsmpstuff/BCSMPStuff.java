@@ -26,14 +26,7 @@ public class BCSMPStuff implements ModInitializer {
 	public void onInitialize() {
 		ModItems.registerModItems();
 		ModBlocks.registerModBlocks();
-
-		UseItemCallback.EVENT.register((player, world, hand) -> {
-			if (!world.isClient && player.isFallFlying() && player.getStackInHand(hand).getItem() == Items.FIREWORK_ROCKET) {
-				player.sendMessage(Text.literal("You can't use rockets while flying!"), true);
-				return TypedActionResult.fail(player.getStackInHand(hand));
-			}
-			return TypedActionResult.pass(player.getStackInHand(hand));
-		});
+		ProtectedSphere.register();
 
 		ServerTickEvents.END_WORLD_TICK.register(world -> {
 			if (!(world instanceof ServerWorld)) return;
@@ -42,7 +35,7 @@ public class BCSMPStuff implements ModInitializer {
 
 			Random random = serverWorld.getRandom();
 
-			if (random.nextInt(12) != 0) return;
+			if (random.nextInt(5000) != 0) return;
 
 			List<ServerPlayerEntity> players = serverWorld.getPlayers(player -> true);
 			if (players.isEmpty()) return;
