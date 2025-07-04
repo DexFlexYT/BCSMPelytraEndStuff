@@ -18,7 +18,7 @@ import java.util.List;
 
 public class BCSMPStuff implements ModInitializer {
 
-	public static final String MOD_ID = "bcsmpelytrarebalance";
+	public static final String MOD_ID = "bcsmp-stuff";
 	public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 
 
@@ -42,7 +42,7 @@ public class BCSMPStuff implements ModInitializer {
 
 			Random random = serverWorld.getRandom();
 
-			if (random.nextInt(1250) != 0) return;
+			if (random.nextInt(12) != 0) return;
 
 			List<ServerPlayerEntity> players = serverWorld.getPlayers(player -> true);
 			if (players.isEmpty()) return;
@@ -51,7 +51,7 @@ public class BCSMPStuff implements ModInitializer {
 
 			double x = player.getX() + (random.nextDouble() * 20.0) - 10.0;
 			double z = player.getZ() + (random.nextDouble() * 20.0) - 10.0;
-			double y = 256.0;  // Fixed Y level
+			double y = 321.0;  // Fixed Y level
 
 			ItemStack stack = new ItemStack(ModItems.SKYGLEAM);
 			ItemEntity drop = new ItemEntity(serverWorld, x, y, z, stack);

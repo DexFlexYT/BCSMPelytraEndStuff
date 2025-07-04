@@ -29,7 +29,6 @@ public class SkylightBlock extends Block {
                 .suffocates((s, w, p) -> false)
                 .blockVision((s, w, p) -> false)
                 .sounds(BlockSoundGroup.LANTERN)
-
         );
 }
 
