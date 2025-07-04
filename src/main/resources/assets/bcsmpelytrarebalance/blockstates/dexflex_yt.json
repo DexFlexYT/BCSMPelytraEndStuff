@@ -1,8 +1,0 @@
-{
-  "variants": {
-    "facing=north":  { "model": "bcsmpelytrarebalance:block/dexflex_yt" },
-    "facing=south":  { "model": "bcsmpelytrarebalance:block/dexflex_yt", "y": 180 },
-    "facing=west":   { "model": "bcsmpelytrarebalance:block/dexflex_yt", "y": 270 },
-    "facing=east":   { "model": "bcsmpelytrarebalance:block/dexflex_yt", "y": 90 }
-  }
-}
