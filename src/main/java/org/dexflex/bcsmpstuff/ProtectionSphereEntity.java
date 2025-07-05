@@ -4,6 +4,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.Packet;
+import net.minecraft.network.packet.s2c.play.EntitySpawnS2CPacket;
 import net.minecraft.world.World;
 
 public class ProtectionSphereEntity extends Entity {
@@ -22,30 +23,35 @@ public class ProtectionSphereEntity extends Entity {
     }
 
     @Override
+    public Packet<?> createSpawnPacket() {
+        // This tells Fabric/Minecraft how to tell clients “hey, a new entity spawned here”
+        return new EntitySpawnS2CPacket(this);
+    }
+    @Override
     protected void initDataTracker() {}
 
     @Override
-    protected void readCustomDataFromNbt(NbtCompound nbt) {
-        radius = nbt.getDouble("Radius");
-        pointCount = nbt.getInt("PointCount");
-        turnSpeed = nbt.getDouble("TurnSpeed");
-        movementSpeed = nbt.getDouble("MovementSpeed");
-        lowerThreshold = nbt.getDouble("LowerThreshold");
-        upperThreshold = nbt.getDouble("UpperThreshold");
-        avoidanceRadius = nbt.getDouble("AvoidanceRadius");
-        avoidanceStrength = nbt.getDouble("AvoidanceStrength");
+    protected void writeCustomDataToNbt(NbtCompound tag) {
+        tag.putDouble("radius", radius);
+        tag.putInt("pointCount", pointCount);
+        tag.putDouble("turnSpeed", turnSpeed);
+        tag.putDouble("movementSpeed", movementSpeed);
+        tag.putDouble("lowerThreshold", lowerThreshold);
+        tag.putDouble("upperThreshold", upperThreshold);
+        tag.putDouble("avoidanceRadius", avoidanceRadius);
+        tag.putDouble("avoidanceStrength", avoidanceStrength);
     }
 
     @Override
-    protected void writeCustomDataToNbt(NbtCompound nbt) {
-        nbt.putDouble("Radius", radius);
-        nbt.putInt("PointCount", pointCount);
-        nbt.putDouble("TurnSpeed", turnSpeed);
-        nbt.putDouble("MovementSpeed", movementSpeed);
-        nbt.putDouble("LowerThreshold", lowerThreshold);
-        nbt.putDouble("UpperThreshold", upperThreshold);
-        nbt.putDouble("AvoidanceRadius", avoidanceRadius);
-        nbt.putDouble("AvoidanceStrength", avoidanceStrength);
+    protected void readCustomDataFromNbt(NbtCompound tag) {
+        radius = tag.getDouble("radius");
+        pointCount = tag.getInt("pointCount");
+        turnSpeed = tag.getDouble("turnSpeed");
+        movementSpeed = tag.getDouble("movementSpeed");
+        lowerThreshold = tag.getDouble("lowerThreshold");
+        upperThreshold = tag.getDouble("upperThreshold");
+        avoidanceRadius = tag.getDouble("avoidanceRadius");
+        avoidanceStrength = tag.getDouble("avoidanceStrength");
     }
 
     @Override
@@ -67,10 +73,6 @@ public class ProtectionSphereEntity extends Entity {
         return true;
     }
 
-    @Override
-    public Packet<?> createSpawnPacket() {
-        return null;
-    }
 
     @Override
     public boolean isSpectator() {

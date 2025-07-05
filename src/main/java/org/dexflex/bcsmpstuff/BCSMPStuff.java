@@ -25,8 +25,8 @@ public class BCSMPStuff implements ModInitializer {
 
 	public static final EntityType<ProtectionSphereEntity> PROTECTION_SPHERE =
 			Registry.register(Registry.ENTITY_TYPE, new Identifier(MOD_ID, "protection_sphere"),
-					FabricEntityTypeBuilder.<ProtectionSphereEntity>create(SpawnGroup.MISC, ProtectionSphereEntity::new)
-							.dimensions(EntityDimensions.fixed(0.1f, 0.1f)) // effectively invisible
+					FabricEntityTypeBuilder.create(SpawnGroup.MISC, ProtectionSphereEntity::new)
+							.dimensions(EntityDimensions.fixed(0.1f, 0.1f))
 							.trackRangeChunks(10)
 							.trackedUpdateRate(20)
 							.build());
@@ -35,7 +35,6 @@ public class BCSMPStuff implements ModInitializer {
 	public void onInitialize() {
 		ModItems.registerModItems();
 		ModBlocks.registerModBlocks();
-		ProtectedSphere.register();
 
 		ServerTickEvents.END_WORLD_TICK.register(world -> {
 			if (!(world instanceof ServerWorld)) return;

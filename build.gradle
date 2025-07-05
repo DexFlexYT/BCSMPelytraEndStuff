@@ -20,7 +20,6 @@ repositories {
 
 loom {
 	splitEnvironmentSourceSets()
-
 	mods {
 		"bcsmp-stuff" {
 			sourceSet sourceSets.main

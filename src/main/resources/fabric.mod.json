@@ -19,7 +19,7 @@
 			"org.dexflex.bcsmpstuff.BCSMPStuff"
 		],
 		"client": [
-			"org.dexflex.bcsmpstuff.BCSMPStuffClient"
+			"org.dexflex.bcsmpstuff.ClientNetworkHandler"
 		]
 	},
 	"mixins": [
