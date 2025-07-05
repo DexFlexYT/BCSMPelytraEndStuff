@@ -2,15 +2,17 @@ package org.dexflex.bcsmpstuff;
 
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
-import net.fabricmc.fabric.api.event.player.UseItemCallback;
+import net.fabricmc.fabric.api.object.builder.v1.entity.FabricEntityTypeBuilder;
+import net.minecraft.entity.EntityDimensions;
+import net.minecraft.entity.EntityType;
 import net.minecraft.entity.ItemEntity;
+import net.minecraft.entity.SpawnGroup;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
-import net.minecraft.text.Text;
-import net.minecraft.util.TypedActionResult;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.math.random.Random;
+import net.minecraft.util.registry.Registry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,6 +23,13 @@ public class BCSMPStuff implements ModInitializer {
 	public static final String MOD_ID = "bcsmp-stuff";
 	public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 
+	public static final EntityType<ProtectionSphereEntity> PROTECTION_SPHERE =
+			Registry.register(Registry.ENTITY_TYPE, new Identifier(MOD_ID, "protection_sphere"),
+					FabricEntityTypeBuilder.<ProtectionSphereEntity>create(SpawnGroup.MISC, ProtectionSphereEntity::new)
+							.dimensions(EntityDimensions.fixed(0.1f, 0.1f)) // effectively invisible
+							.trackRangeChunks(10)
+							.trackedUpdateRate(20)
+							.build());
 
 	@Override
 	public void onInitialize() {
