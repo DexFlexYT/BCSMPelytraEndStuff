@@ -16,12 +16,14 @@ public class ProtectedSphere {
     private static final Vec3d CENTER = new Vec3d(-40, 112, 0);
     private static final double RADIUS = 32;
 
-    private static final int POINT_COUNT = 100;
+    private static final int POINT_COUNT = 32;
     private static final List<SpherePoint> surfacePoints = new ArrayList<>(POINT_COUNT);
     private static final double TURN_SPEED = 0.1;
     private static final double MOVEMENT_SPEED = 0.2;
-    private static final double LOWER_THRESHOLD = 12.0;
-    private static final double UPPER_THRESHOLD = 20.0;
+    private static final double LOWER_THRESHOLD = 18.0;
+    private static final double UPPER_THRESHOLD = 26.0;
+    private static final double AVOIDANCE_RADIUS = 16.0;
+    private static final double AVOIDANCE_STRENGTH = 0.1;
 
     private static final Random rand = new Random();
 
@@ -41,6 +43,21 @@ public class ProtectedSphere {
 
     private static void updateSurfacePoints() {
         for (SpherePoint sp : surfacePoints) {
+            Vec3d avoidance = Vec3d.ZERO;
+            for (SpherePoint other : surfacePoints) {
+                if (sp == other) continue;
+                double dist = sp.pos.distanceTo(other.pos);
+                if (dist < AVOIDANCE_RADIUS) {
+                    Vec3d away = sp.pos.subtract(other.pos).normalize();
+                    avoidance = avoidance.add(away.multiply(1.0 - dist / AVOIDANCE_RADIUS));
+                }
+            }
+
+            if (avoidance.lengthSquared() > 0) {
+                avoidance = avoidance.normalize().multiply(AVOIDANCE_STRENGTH);
+                sp.dir = sp.dir.add(avoidance).normalize();
+            }
+
             sp.dir = rotateAroundRandomAxis(sp.dir, TURN_SPEED).normalize();
             Vec3d targetPos = sp.pos.add(sp.dir.multiply(MOVEMENT_SPEED));
             Vec3d fromCenter = targetPos.subtract(CENTER).normalize().multiply(RADIUS);
@@ -79,6 +96,10 @@ public class ProtectedSphere {
             Vec3d point = start.add(step.multiply(i));
             Vec3d offset = randomPerpendicularVector(diff).multiply(0.3 * (rand.nextDouble() - 0.5));
             Vec3d pos = point.add(offset);
+
+            // Project to sphere surface
+            pos = CENTER.add(pos.subtract(CENTER).normalize().multiply(RADIUS));
+
             BlockPos bp = new BlockPos(pos.x, pos.y, pos.z);
             if (!world.getBlockState(bp).isAir()) continue;
 
