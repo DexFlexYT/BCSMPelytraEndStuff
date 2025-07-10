@@ -19,10 +19,10 @@ public class ProtectedSphere {
     private static final int POINT_COUNT = 32;
     private static final List<SpherePoint> surfacePoints = new ArrayList<>(POINT_COUNT);
     private static final double TURN_SPEED = 0.1;
-    private static final double MOVEMENT_SPEED = 0.4;
-    private static final double LOWER_THRESHOLD = 17.0;
-    private static final double UPPER_THRESHOLD = 20.0;
-    private static final double AVOIDANCE_RADIUS = 13.0;
+    private static final double MOVEMENT_SPEED = 0.2;
+    private static final double LOWER_THRESHOLD = 18.0;
+    private static final double UPPER_THRESHOLD = 26.0;
+    private static final double AVOIDANCE_RADIUS = 16.0;
     private static final double AVOIDANCE_STRENGTH = 0.1;
 
     private static final Random rand = new Random();
@@ -88,7 +88,7 @@ public class ProtectedSphere {
     }
 
     private static void spawnJaggedLine(ServerWorld world, Vec3d start, Vec3d end) {
-        int segments = 20;
+        int segments = 10;
         Vec3d diff = end.subtract(start);
         Vec3d step = diff.multiply(1.0 / segments);
 

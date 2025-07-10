@@ -2,6 +2,8 @@ package org.dexflex.bcsmpstuff;
 
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
+import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
+import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricEntityTypeBuilder;
 import net.minecraft.entity.EntityDimensions;
 import net.minecraft.entity.EntityType;
@@ -23,18 +25,28 @@ public class BCSMPStuff implements ModInitializer {
 	public static final String MOD_ID = "bcsmp-stuff";
 	public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 
-	public static final EntityType<ProtectionSphereEntity> PROTECTION_SPHERE =
-			Registry.register(Registry.ENTITY_TYPE, new Identifier(MOD_ID, "protection_sphere"),
-					FabricEntityTypeBuilder.create(SpawnGroup.MISC, ProtectionSphereEntity::new)
-							.dimensions(EntityDimensions.fixed(0.1f, 0.1f))
-							.trackRangeChunks(10)
-							.trackedUpdateRate(20)
-							.build());
 
 	@Override
 	public void onInitialize() {
 		ModItems.registerModItems();
 		ModBlocks.registerModBlocks();
+		ProtectedSphere.register();
+		EntityType<SphereMarkerEntity> SPHERE_MARKER = Registry.register(
+				Registry.ENTITY_TYPE,
+				new Identifier(MOD_ID, "sphere_marker"),
+				FabricEntityTypeBuilder.create(SpawnGroup.MISC, SphereMarkerEntity::new)
+						.disableSummon()
+						.dimensions(EntityDimensions.fixed(0f, 0f))
+						.build()
+		);
+		var buf = PacketByteBufs.create();
+		buf.writeBlockPos(marker.getBlockPos());
+		buf.writeDouble(marker.getRadius());
+		buf.writeDouble(marker.getAvoidanceRadius());
+		buf.writeDouble(marker.getAvoidanceStrength());
+		ServerPlayNetworking.send(player, BCSMPStuffClient.SPHERE_CONFIG_CHANNEL, buf);
+
+
 
 		ServerTickEvents.END_WORLD_TICK.register(world -> {
 			if (!(world instanceof ServerWorld)) return;
