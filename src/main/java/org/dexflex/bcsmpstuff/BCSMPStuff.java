@@ -2,8 +2,6 @@ package org.dexflex.bcsmpstuff;
 
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
-import net.fabricmc.fabric.api.networking.v1.PacketByteBufs;
-import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricEntityTypeBuilder;
 import net.minecraft.entity.EntityDimensions;
 import net.minecraft.entity.EntityType;
@@ -20,33 +18,37 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
+
 public class BCSMPStuff implements ModInitializer {
 
 	public static final String MOD_ID = "bcsmp-stuff";
 	public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 
+	public static final EntityType<ProtectionSphereEntity> PROTECTION_SPHERE =
+			Registry.register(Registry.ENTITY_TYPE, new Identifier(MOD_ID, "protection_sphere"),
+					FabricEntityTypeBuilder.<ProtectionSphereEntity>create(SpawnGroup.MISC, ProtectionSphereEntity::new)
+							.dimensions(EntityDimensions.fixed(0.1f, 0.1f)) // effectively invisible
+							.trackRangeChunks(10)
+							.trackedUpdateRate(20)
+							.build());
 
 	@Override
 	public void onInitialize() {
 		ModItems.registerModItems();
 		ModBlocks.registerModBlocks();
-		ProtectedSphere.register();
-		EntityType<SphereMarkerEntity> SPHERE_MARKER = Registry.register(
-				Registry.ENTITY_TYPE,
-				new Identifier(MOD_ID, "sphere_marker"),
-				FabricEntityTypeBuilder.create(SpawnGroup.MISC, SphereMarkerEntity::new)
-						.disableSummon()
-						.dimensions(EntityDimensions.fixed(0f, 0f))
-						.build()
-		);
-		var buf = PacketByteBufs.create();
-		buf.writeBlockPos(marker.getBlockPos());
-		buf.writeDouble(marker.getRadius());
-		buf.writeDouble(marker.getAvoidanceRadius());
-		buf.writeDouble(marker.getAvoidanceStrength());
-		ServerPlayNetworking.send(player, BCSMPStuffClient.SPHERE_CONFIG_CHANNEL, buf);
 
-
+		// DEBUG: Spawn a test ProtectionSphereEntity at 0, 100, 0 in the overworld
+		ServerTickEvents.END_WORLD_TICK.register(world -> {
+			if (!(world instanceof ServerWorld)) return;
+			ServerWorld serverWorld = (ServerWorld) world;
+			if (serverWorld.getTime() == 20) { // Only once, after 1 second
+				ProtectionSphereEntity entity = new ProtectionSphereEntity(PROTECTION_SPHERE, serverWorld);
+				entity.refreshPositionAndAngles(0, 100, 0, 0, 0);
+				serverWorld.spawnEntity(entity);
+				SphereNetworking.sendSphereSettings(entity);
+				LOGGER.info("Spawned test ProtectionSphereEntity at 0,100,0");
+			}
+		});
 
 		ServerTickEvents.END_WORLD_TICK.register(world -> {
 			if (!(world instanceof ServerWorld)) return;
@@ -54,7 +56,6 @@ public class BCSMPStuff implements ModInitializer {
 			if (!serverWorld.isRaining() && !serverWorld.isThundering()) return;
 
 			Random random = serverWorld.getRandom();
-
 			if (random.nextInt(5000) != 0) return;
 
 			List<ServerPlayerEntity> players = serverWorld.getPlayers(player -> true);
@@ -64,7 +65,7 @@ public class BCSMPStuff implements ModInitializer {
 
 			double x = player.getX() + (random.nextDouble() * 20.0) - 10.0;
 			double z = player.getZ() + (random.nextDouble() * 20.0) - 10.0;
-			double y = 321.0;  // Fixed Y level
+			double y = 321.0;
 
 			ItemStack stack = new ItemStack(ModItems.SKYGLEAM);
 			ItemEntity drop = new ItemEntity(serverWorld, x, y, z, stack);

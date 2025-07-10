@@ -21,6 +21,6 @@ public class EmptyEntityRenderer<T extends Entity> extends EntityRenderer<T> {
             net.minecraft.client.util.math.MatrixStack matrices,
             net.minecraft.client.render.VertexConsumerProvider vertexConsumers,
             int light) {
-        // intentionally empty - no entity rendering
+        // don't render anything
     }
 }

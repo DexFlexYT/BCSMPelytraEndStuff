@@ -1,7 +1,7 @@
 {
   "variants": {
     "": {
-      "model": "bcsmpstuff:block/skylight"
+      "model": "bcsmp-stuff:block/skylight"
     }
   }
 }

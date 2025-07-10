@@ -5,7 +5,10 @@ import net.minecraft.entity.EntityType;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.network.Packet;
 import net.minecraft.network.packet.s2c.play.EntitySpawnS2CPacket;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.world.World;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ProtectionSphereEntity extends Entity {
     // Default values
@@ -18,9 +21,12 @@ public class ProtectionSphereEntity extends Entity {
     public double avoidanceRadius = 4.0;
     public double avoidanceStrength = 0.2;
 
-    public ProtectionSphereEntity(EntityType<?> type, World world) {
+    private static final Logger LOGGER = LoggerFactory.getLogger("ProtectionSphereEntity");
+
+    public ProtectionSphereEntity(EntityType<? extends ProtectionSphereEntity> type, World world) {
         super(type, world);
         this.noClip = true;
+        LOGGER.info("ProtectionSphereEntity constructed: id={}, world={}", this.getId(), world.isClient ? "client" : "server");
     }
 
     @Override
@@ -61,4 +67,13 @@ public class ProtectionSphereEntity extends Entity {
     public boolean isInvisible() { return true; }
     @Override
     public boolean isSpectator() { return true; }
+
+    @Override
+    public void tick() {
+        super.tick();
+        if (!this.world.isClient && this.world instanceof ServerWorld) {
+            SphereNetworking.sendSphereSettings(this);
+        }
+    }
 }
+
