@@ -8,14 +8,15 @@ import net.minecraft.network.packet.s2c.play.EntitySpawnS2CPacket;
 import net.minecraft.world.World;
 
 public class ProtectionSphereEntity extends Entity {
-    public double radius = 32;
-    public int pointCount = 32;
+    // Default values
+    public double radius = 16.0;
+    public int pointCount = 16;
     public double turnSpeed = 0.1;
     public double movementSpeed = 0.2;
-    public double lowerThreshold = 18;
-    public double upperThreshold = 26;
-    public double avoidanceRadius = 16;
-    public double avoidanceStrength = 0.1;
+    public double lowerThreshold = 8.0;
+    public double upperThreshold = 12.0;
+    public double avoidanceRadius = 4.0;
+    public double avoidanceStrength = 0.2;
 
     public ProtectionSphereEntity(EntityType<?> type, World world) {
         super(type, world);
@@ -23,12 +24,12 @@ public class ProtectionSphereEntity extends Entity {
     }
 
     @Override
+    protected void initDataTracker() {}
+
+    @Override
     public Packet<?> createSpawnPacket() {
-        // This tells Fabric/Minecraft how to tell clients “hey, a new entity spawned here”
         return new EntitySpawnS2CPacket(this);
     }
-    @Override
-    protected void initDataTracker() {}
 
     @Override
     protected void writeCustomDataToNbt(NbtCompound tag) {
@@ -44,38 +45,20 @@ public class ProtectionSphereEntity extends Entity {
 
     @Override
     protected void readCustomDataFromNbt(NbtCompound tag) {
-        radius = tag.getDouble("radius");
-        pointCount = tag.getInt("pointCount");
-        turnSpeed = tag.getDouble("turnSpeed");
-        movementSpeed = tag.getDouble("movementSpeed");
-        lowerThreshold = tag.getDouble("lowerThreshold");
-        upperThreshold = tag.getDouble("upperThreshold");
-        avoidanceRadius = tag.getDouble("avoidanceRadius");
-        avoidanceStrength = tag.getDouble("avoidanceStrength");
+        if (tag.contains("radius")) radius = tag.getDouble("radius");
+        if (tag.contains("pointCount")) pointCount = tag.getInt("pointCount");
+        if (tag.contains("turnSpeed")) turnSpeed = tag.getDouble("turnSpeed");
+        if (tag.contains("movementSpeed")) movementSpeed = tag.getDouble("movementSpeed");
+        if (tag.contains("lowerThreshold")) lowerThreshold = tag.getDouble("lowerThreshold");
+        if (tag.contains("upperThreshold")) upperThreshold = tag.getDouble("upperThreshold");
+        if (tag.contains("avoidanceRadius")) avoidanceRadius = tag.getDouble("avoidanceRadius");
+        if (tag.contains("avoidanceStrength")) avoidanceStrength = tag.getDouble("avoidanceStrength");
     }
 
     @Override
-    public void tick() {
-        super.tick();
-        if (!getWorld().isClient) {
-            // Send S2C packet to nearby players
-            SphereNetworking.sendSphereSettings(this);
-        }
-    }
-
+    public boolean shouldSave() { return true; }
     @Override
-    public boolean shouldSave() {
-        return true;
-    }
-
+    public boolean isInvisible() { return true; }
     @Override
-    public boolean isInvisible() {
-        return true;
-    }
-
-
-    @Override
-    public boolean isSpectator() {
-        return true;
-    }
+    public boolean isSpectator() { return true; }
 }

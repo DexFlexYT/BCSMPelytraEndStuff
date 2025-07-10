@@ -10,10 +10,12 @@ public class SphereNetworking {
     public static final Identifier SPHERE_UPDATE_PACKET =
             new Identifier(BCSMPStuff.MOD_ID, "sphere_update");
 
-    /** Call this on the server whenever you spawn or update your ProtectionSphereEntity. */
+    /**
+     * Send sphere settings from server to client (no lineMode).
+     */
     public static void sendSphereSettings(ProtectionSphereEntity entity) {
         PacketByteBuf buf = PacketByteBufs.create();
-        buf.writeUuid(entity.getUuid());
+        buf.writeVarInt(entity.getId());
         buf.writeBlockPos(entity.getBlockPos());
         buf.writeDouble(entity.radius);
         buf.writeInt(entity.pointCount);
@@ -23,10 +25,12 @@ public class SphereNetworking {
         buf.writeDouble(entity.upperThreshold);
         buf.writeDouble(entity.avoidanceRadius);
         buf.writeDouble(entity.avoidanceStrength);
+        // Removed lineMode boolean
 
         for (var p : entity.getWorld().getPlayers()) {
-            if (p instanceof ServerPlayerEntity serverPlayer) {
-                ServerPlayNetworking.send(serverPlayer, SPHERE_UPDATE_PACKET, buf);
+            if (p instanceof ServerPlayerEntity sp) {
+                ServerPlayNetworking.send(sp, SPHERE_UPDATE_PACKET, buf);
+                BCSMPStuff.LOGGER.info("[SphereNetworking] Sent sphere update packet to player " + sp.getName().getString());
             }
         }
     }
