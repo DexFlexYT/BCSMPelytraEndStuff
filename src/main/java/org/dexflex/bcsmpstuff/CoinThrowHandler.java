@@ -10,8 +10,6 @@ import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvent;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.math.Vec3d;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.dexflex.bcsmpstuff.item.ModItems;
 
 import java.util.HashMap;
@@ -20,13 +18,15 @@ import java.util.UUID;
 
 public class CoinThrowHandler {
 
-    //private static final Logger LOGGER = LogManager.getLogger("CoinThrowDebug");
-
     private static final SoundEvent MARKSMAN_COINFLIP_SOUND = ModSounds.COINFLIP;
 
     private static final Map<UUID, Vec3d> previousPositions = new HashMap<>();
-
     private static final Map<UUID, Vec3d> playerVelocities = new HashMap<>();
+
+    // Cooldown map: player UUID -> ticks remaining
+    private static final Map<UUID, Integer> coinThrowCooldowns = new HashMap<>();
+
+    private static final int COIN_THROW_COOLDOWN_TICKS = 5;
 
     public static void register() {
         UseItemCallback.EVENT.register((player, world, hand) -> {
@@ -34,36 +34,47 @@ public class CoinThrowHandler {
 
             if (stack.getItem() == Items.GOLD_NUGGET) {
                 boolean hasRevolver = player.getInventory().contains(new ItemStack(ModItems.MARKSMAN_REVOLVER));
+
                 if (hasRevolver) {
                     if (!world.isClient) {
+                        UUID playerId = player.getUuid();
 
+                        // Check cooldown
+                        Integer cooldown = coinThrowCooldowns.getOrDefault(playerId, 0);
+                        if (cooldown > 0) {
+                            // Still on cooldown, prevent throwing
+                            return TypedActionResult.fail(stack);
+                        }
+
+                        // Play coin flip sound
                         float playerPitch = 0.9f + world.random.nextFloat() * 0.2f;
                         world.playSound(null, player.getX(), player.getY() + player.getStandingEyeHeight(), player.getZ(),
                                 MARKSMAN_COINFLIP_SOUND, SoundCategory.PLAYERS, 1.1f, playerPitch);
+
+                        // Decrement stack
                         stack.decrement(1);
 
+                        // Create thrown coin entity
                         ItemStack thrownStack = new ItemStack(Items.GOLD_NUGGET);
                         ItemEntity thrownItem = new ItemEntity(world, player.getX(), player.getY() + player.getStandingEyeHeight(), player.getZ(), thrownStack);
 
-                        Vec3d playerVelocity = playerVelocities.getOrDefault(player.getUuid(), Vec3d.ZERO);
+                        Vec3d playerVelocity = playerVelocities.getOrDefault(playerId, Vec3d.ZERO);
                         Vec3d lookVec = player.getRotationVec(1.0F).normalize();
 
                         double forwardSpeed = 0.3;
-
-
                         Vec3d forwardVelocity = lookVec.multiply(forwardSpeed);
-
 
                         double momentumFactor = 1.2;
                         Vec3d momentumVelocity = playerVelocity.multiply(momentumFactor);
 
-
                         Vec3d throwVelocity = forwardVelocity.add(momentumVelocity).add(0, 0.15, 0);
 
-
                         thrownItem.setVelocity(throwVelocity);
-                        thrownItem.setPickupDelay(12000);
+                        thrownItem.setPickupDelay(20);
                         world.spawnEntity(thrownItem);
+
+                        // Set cooldown
+                        coinThrowCooldowns.put(playerId, COIN_THROW_COOLDOWN_TICKS);
                     }
                     return TypedActionResult.success(stack, world.isClient);
                 }
@@ -81,8 +92,10 @@ public class CoinThrowHandler {
                     Vec3d velocity = currentPos.subtract(prevPos);
                     playerVelocities.put(playerId, velocity);
                 }
-
                 previousPositions.put(playerId, currentPos);
+
+                // Decrement cooldown if present
+                coinThrowCooldowns.computeIfPresent(playerId, (uuid, ticks) -> ticks > 0 ? ticks - 1 : 0);
             }
         });
     }
