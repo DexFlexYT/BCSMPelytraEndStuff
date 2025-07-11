@@ -1,0 +1,24 @@
+{
+    "marksman.shoot": {
+      "sounds": [
+        "bcsmp-stuff:marksman/shoot1",
+        "bcsmp-stuff:marksman/shoot2",
+        "bcsmp-stuff:marksman/shoot3"
+        ]
+      },
+      "marksman.coinflip": {
+        "sounds": [
+          "bcsmp-stuff:marksman/coinflip"
+        ]
+      },
+      "marksman.coinspin": {
+        "sounds": [
+          "bcsmp-stuff:marksman/coinspin"
+        ]
+      },
+      "marksman.coinflashloop": {
+        "sounds": [
+          "bcsmp-stuff:marksman/coinflashloop"
+        ]
+      }
+}

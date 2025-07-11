@@ -13,6 +13,8 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.random.Random;
 import net.minecraft.util.registry.Registry;
+import org.dexflex.bcsmpstuff.block.ModBlocks;
+import org.dexflex.bcsmpstuff.item.ModItems;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,6 +38,8 @@ public class BCSMPStuff implements ModInitializer {
 	public void onInitialize() {
 		ModItems.registerModItems();
 		ModBlocks.registerModBlocks();
+		CoinThrowHandler.register();
+		ModSounds.registerModSounds();
 
 		// DEBUG: Spawn a test ProtectionSphereEntity at 0, 100, 0 in the overworld
 		ServerTickEvents.END_WORLD_TICK.register(world -> {

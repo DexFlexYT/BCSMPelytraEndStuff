@@ -1,4 +1,4 @@
-package org.dexflex.bcsmpstuff;
+package org.dexflex.bcsmpstuff.block;
 
 import net.fabricmc.fabric.api.item.v1.FabricItemSettings;
 import net.fabricmc.fabric.api.object.builder.v1.block.FabricBlockSettings;
@@ -9,6 +9,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;
+import org.dexflex.bcsmpstuff.BCSMPStuff;
 
 public class ModBlocks {
 

@@ -14,10 +14,10 @@ import java.util.*;
 public class SphereRenderer {
     private static final Map<Integer, SphereData> spheres = new HashMap<>();
     private static final Random random = new Random();
-    private static final Logger LOGGER = LoggerFactory.getLogger("SphereRenderer");
+    //private static final Logger LOGGER = LoggerFactory.getLogger("SphereRenderer");
 
     public static void handlePacket(PacketByteBuf buf) {
-        LOGGER.info("Received sphere update packet");
+        //LOGGER.info("Received sphere update packet");
         int entityId = buf.readVarInt();
         BlockPos pos = buf.readBlockPos();
         double radius = buf.readDouble();
@@ -34,18 +34,18 @@ public class SphereRenderer {
             spheres.put(entityId, new SphereData(entityId, pos, radius, pointCount,
                     turnSpeed, movementSpeed, lowerThreshold, upperThreshold,
                     avoidR, avoidS));
-            LOGGER.info("Created new sphere for entity {}", entityId);
+            //LOGGER.info("Created new sphere for entity {}", entityId);
         } else {
             data.updateParams(pos, radius, turnSpeed, movementSpeed,
                     lowerThreshold, upperThreshold, avoidR, avoidS);
-            LOGGER.info("Updated sphere for entity {}", entityId);
+            //LOGGER.info("Updated sphere for entity {}", entityId);
         }
     }
 
     public static void tick(MinecraftClient client) {
         ClientWorld world = client.world;
         if (world == null) return;
-        LOGGER.info("SphereRenderer.tick called, spheres={}", spheres.size());
+        //LOGGER.info("SphereRenderer.tick called, spheres={}", spheres.size());
 
         Iterator<Map.Entry<Integer, SphereData>> iter = spheres.entrySet().iterator();
         while (iter.hasNext()) {
@@ -55,12 +55,12 @@ public class SphereRenderer {
 
             if (world.getEntityById(id) == null) {
                 iter.remove();
-                LOGGER.info("Removed sphere for entity {} (entity missing)", id);
+                //LOGGER.info("Removed sphere for entity {} (entity missing)", id);
             } else {
                 data.updateAndRender(world);
                 // Only log the first sphere per tick to avoid spam
                 if (id == spheres.keySet().iterator().next()) {
-                    LOGGER.info("Rendering sphere for entity {}", id);
+                    //LOGGER.info("Rendering sphere for entity {}", id);
                 }
             }
         }

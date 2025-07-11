@@ -21,12 +21,12 @@ public class ProtectionSphereEntity extends Entity {
     public double avoidanceRadius = 4.0;
     public double avoidanceStrength = 0.2;
 
-    private static final Logger LOGGER = LoggerFactory.getLogger("ProtectionSphereEntity");
+    //private static final Logger LOGGER = LoggerFactory.getLogger("ProtectionSphereEntity");
 
     public ProtectionSphereEntity(EntityType<? extends ProtectionSphereEntity> type, World world) {
         super(type, world);
         this.noClip = true;
-        LOGGER.info("ProtectionSphereEntity constructed: id={}, world={}", this.getId(), world.isClient ? "client" : "server");
+        //LOGGER.info("ProtectionSphereEntity constructed: id={}, world={}", this.getId(), world.isClient ? "client" : "server");
     }
 
     @Override

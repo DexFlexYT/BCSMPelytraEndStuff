@@ -1,4 +1,4 @@
-package org.dexflex.bcsmpstuff;
+package org.dexflex.bcsmpstuff.block;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;

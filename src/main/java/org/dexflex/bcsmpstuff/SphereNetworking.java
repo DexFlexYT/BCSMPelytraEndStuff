@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory;
 public class SphereNetworking {
     public static final Identifier SPHERE_UPDATE_PACKET =
             new Identifier(BCSMPStuff.MOD_ID, "sphere_update");
-    private static final Logger LOGGER = LoggerFactory.getLogger("SphereNetworking");
+    //private static final Logger LOGGER = LoggerFactory.getLogger("SphereNetworking");
 
     /**
      * Send sphere settings from server to client (no lineMode).
@@ -31,7 +31,7 @@ public class SphereNetworking {
                 buf.writeDouble(entity.avoidanceRadius);
                 buf.writeDouble(entity.avoidanceStrength);
                 ServerPlayNetworking.send(sp, SPHERE_UPDATE_PACKET, buf);
-                LOGGER.info("Sent sphere update packet for entity {} to player {}", entity.getId(), sp.getEntityName());
+                //LOGGER.info("Sent sphere update packet for entity {} to player {}", entity.getId(), sp.getEntityName());
             }
         }
     }
