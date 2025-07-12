@@ -30,7 +30,7 @@ public class MarksmanRevolverItem extends Item {
     private static final int COOLDOWN_TICKS = 10;
     private static final double MAX_RANGE = 64.0;
     private static final int MAX_RICOCHETS = 5;
-    private static final float BASE_DAMAGE = 4.0f;
+    private static final float BASE_DAMAGE = 6.0f;
 
     private static final SoundEvent MARKSMAN_SHOOT_SOUND = ModSounds.MARKSMAN_SHOOT;
     private static final SoundEvent COINFLIP_SOUND = ModSounds.COINFLIP;
@@ -38,17 +38,6 @@ public class MarksmanRevolverItem extends Item {
     public MarksmanRevolverItem(Settings settings) {
         super(settings);
     }
-
-    private void removeGroundedCoins(World world) {
-        // Search for all gold nugget item entities that are on the ground and remove them
-        for (Entity entity : world.getEntitiesByClass(ItemEntity.class, new Box(Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY), e -> {
-            ItemEntity item = (ItemEntity) e;
-            return item.getStack().getItem() == Items.GOLD_NUGGET && item.isOnGround();
-        })) {
-            entity.remove(Entity.RemovalReason.DISCARDED);
-        }
-    }
-
 
     @Override
     public TypedActionResult<ItemStack> use(World world, PlayerEntity user, Hand hand) {
@@ -88,8 +77,9 @@ public class MarksmanRevolverItem extends Item {
 
                 for (Entity entity : world.getOtherEntities(user, box)) {
                     if (entity instanceof ItemEntity itemEntity) {
-                        ItemStack itemStack = itemEntity.getStack();
-                        if (itemStack.getItem() == Items.GOLD_NUGGET) {
+                        var nbt = itemEntity.getStack().getNbt();
+                        if (itemEntity.getStack().getItem() == Items.GOLD_NUGGET
+                                && nbt != null && nbt.getBoolean("ThrownByMarksman")) {
                             coinHitResult = new EntityHitResult(itemEntity, point);
                             coinHitPos = point;
                             coinHitEntity = itemEntity;
@@ -101,16 +91,10 @@ public class MarksmanRevolverItem extends Item {
             }
 
             if (coinHitEntity != null) {
-                // Remove all coins on the ground first
-                removeGroundedCoins(world);
-
-                // Start ricochet chain with base damage
                 ricochetChain(world, user, coinHitEntity.getPos(), direction, new HashSet<>(), 0, BASE_DAMAGE);
-
                 coinHitEntity.remove(Entity.RemovalReason.DISCARDED);
                 user.getItemCooldownManager().set(this, COOLDOWN_TICKS);
-            }
-            else {
+            } else {
                 EntityHitResult entityHitResult = null;
                 double closestDistance = Double.MAX_VALUE;
 
@@ -196,8 +180,7 @@ public class MarksmanRevolverItem extends Item {
             coin.remove(Entity.RemovalReason.DISCARDED);
             hitCoins.add(coin);
 
-            // Increase damage by 1 for each coin hit
-            ricochetChain(world, shooter, targetPos, direction, hitCoins, ricochetCount + 1, currentDamage + 1.0f);
+            ricochetChain(world, shooter, targetPos, direction, hitCoins, ricochetCount + 1, currentDamage + 4.0f);
 
         } else if (target instanceof LivingEntity living) {
             living.damage(net.minecraft.entity.damage.DamageSource.player(shooter), currentDamage);
@@ -214,7 +197,8 @@ public class MarksmanRevolverItem extends Item {
 
         for (Entity entity : world.getOtherEntities(null, searchBox)) {
             if (entity instanceof ItemEntity itemEntity && !excludeCoins.contains(entity)) {
-                if (itemEntity.getStack().getItem() == Items.GOLD_NUGGET) {
+                var nbt = itemEntity.getStack().getNbt();
+                if (itemEntity.getStack().getItem() == Items.GOLD_NUGGET && nbt != null && nbt.getBoolean("ThrownByMarksman")) {
                     double dist = entity.squaredDistanceTo(pos);
                     if (dist < nearestDist) {
                         nearestDist = dist;

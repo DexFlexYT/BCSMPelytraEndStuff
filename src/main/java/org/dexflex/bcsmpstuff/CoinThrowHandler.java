@@ -23,10 +23,8 @@ public class CoinThrowHandler {
     private static final Map<UUID, Vec3d> previousPositions = new HashMap<>();
     private static final Map<UUID, Vec3d> playerVelocities = new HashMap<>();
 
-    // Cooldown map: player UUID -> ticks remaining
     private static final Map<UUID, Integer> coinThrowCooldowns = new HashMap<>();
-
-    private static final int COIN_THROW_COOLDOWN_TICKS = 5;
+    private static final int COIN_THROW_COOLDOWN_TICKS = 7;
 
     public static void register() {
         UseItemCallback.EVENT.register((player, world, hand) -> {
@@ -39,23 +37,21 @@ public class CoinThrowHandler {
                     if (!world.isClient) {
                         UUID playerId = player.getUuid();
 
-                        // Check cooldown
                         Integer cooldown = coinThrowCooldowns.getOrDefault(playerId, 0);
                         if (cooldown > 0) {
-                            // Still on cooldown, prevent throwing
                             return TypedActionResult.fail(stack);
                         }
 
-                        // Play coin flip sound
                         float playerPitch = 0.9f + world.random.nextFloat() * 0.2f;
                         world.playSound(null, player.getX(), player.getY() + player.getStandingEyeHeight(), player.getZ(),
                                 MARKSMAN_COINFLIP_SOUND, SoundCategory.PLAYERS, 1.1f, playerPitch);
 
-                        // Decrement stack
                         stack.decrement(1);
 
-                        // Create thrown coin entity
                         ItemStack thrownStack = new ItemStack(Items.GOLD_NUGGET);
+                        // Tag the thrown coin inside the ItemStack NBT
+                        thrownStack.getOrCreateNbt().putBoolean("ThrownByMarksman", true);
+
                         ItemEntity thrownItem = new ItemEntity(world, player.getX(), player.getY() + player.getStandingEyeHeight(), player.getZ(), thrownStack);
 
                         Vec3d playerVelocity = playerVelocities.getOrDefault(playerId, Vec3d.ZERO);
@@ -67,13 +63,13 @@ public class CoinThrowHandler {
                         double momentumFactor = 1.2;
                         Vec3d momentumVelocity = playerVelocity.multiply(momentumFactor);
 
-                        Vec3d throwVelocity = forwardVelocity.add(momentumVelocity).add(0, 0.15, 0);
+                        Vec3d throwVelocity = forwardVelocity.add(momentumVelocity).add(0, 0.3, 0);
 
                         thrownItem.setVelocity(throwVelocity);
                         thrownItem.setPickupDelay(20);
+
                         world.spawnEntity(thrownItem);
 
-                        // Set cooldown
                         coinThrowCooldowns.put(playerId, COIN_THROW_COOLDOWN_TICKS);
                     }
                     return TypedActionResult.success(stack, world.isClient);
@@ -94,7 +90,6 @@ public class CoinThrowHandler {
                 }
                 previousPositions.put(playerId, currentPos);
 
-                // Decrement cooldown if present
                 coinThrowCooldowns.computeIfPresent(playerId, (uuid, ticks) -> ticks > 0 ? ticks - 1 : 0);
             }
         });
