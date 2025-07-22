@@ -1,0 +1,1 @@
+kill @e[type=item,nbt={Item:{id:"minecraft:gold_nugget",Count:1b,tag:{ThrownByMarksman:1b}},OnGround:1b}]

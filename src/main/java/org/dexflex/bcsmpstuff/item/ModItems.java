@@ -10,8 +10,6 @@ public class ModItems {
     public static final Item SKYGLEAM = registerItem("skygleam",
             new Item(new FabricItemSettings()));
 
-    public static final Item MARKSMAN_REVOLVER = registerItem("marksman_revolver",
-            new MarksmanRevolverItem(new FabricItemSettings().maxCount(1)));
 
 
     private static Item registerItem(String name, Item item) {

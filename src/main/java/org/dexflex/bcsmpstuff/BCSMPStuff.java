@@ -38,7 +38,6 @@ public class BCSMPStuff implements ModInitializer {
 	public void onInitialize() {
 		ModItems.registerModItems();
 		ModBlocks.registerModBlocks();
-		CoinThrowHandler.register();
 		ModSounds.registerModSounds();
 
 		// DEBUG: Spawn a test ProtectionSphereEntity at 0, 100, 0 in the overworld
@@ -50,7 +49,6 @@ public class BCSMPStuff implements ModInitializer {
 				entity.refreshPositionAndAngles(0, 100, 0, 0, 0);
 				serverWorld.spawnEntity(entity);
 				SphereNetworking.sendSphereSettings(entity);
-				LOGGER.info("Spawned test ProtectionSphereEntity at 0,100,0");
 			}
 		});
 
