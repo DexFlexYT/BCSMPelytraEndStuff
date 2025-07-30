@@ -12,7 +12,7 @@ public class EmptyEntityRenderer<T extends Entity> extends EntityRenderer<T> {
 
     @Override
     public Identifier getTexture(T entity) {
-        return null; // no texture
+        return null;
     }
 
     @Override
@@ -21,6 +21,5 @@ public class EmptyEntityRenderer<T extends Entity> extends EntityRenderer<T> {
             net.minecraft.client.util.math.MatrixStack matrices,
             net.minecraft.client.render.VertexConsumerProvider vertexConsumers,
             int light) {
-        // don't render anything
     }
 }

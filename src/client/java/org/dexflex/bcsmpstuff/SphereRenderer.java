@@ -2,50 +2,67 @@ package org.dexflex.bcsmpstuff;
 
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.world.ClientWorld;
-import net.minecraft.network.PacketByteBuf;
-import net.minecraft.particle.ParticleTypes;
+import net.minecraft.nbt.NbtCompound;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
 public class SphereRenderer {
     private static final Map<Integer, SphereData> spheres = new HashMap<>();
     private static final Random random = new Random();
-    //private static final Logger LOGGER = LoggerFactory.getLogger("SphereRenderer");
 
-    public static void handlePacket(PacketByteBuf buf) {
-        //LOGGER.info("Received sphere update packet");
-        int entityId = buf.readVarInt();
-        BlockPos pos = buf.readBlockPos();
-        double radius = buf.readDouble();
-        int pointCount = buf.readInt();
-        double turnSpeed = buf.readDouble();
-        double movementSpeed = buf.readDouble();
-        double lowerThreshold = buf.readDouble();
-        double upperThreshold = buf.readDouble();
-        double avoidR = buf.readDouble();
-        double avoidS = buf.readDouble();
+    public static void handlePacket(NbtCompound tag) {
+        int entityId = tag.getInt("id");
+        BlockPos pos = BlockPos.fromLong(tag.getLong("pos"));
+        double radius = tag.getDouble("radius");
+        int pointCount = tag.getInt("pointCount");
+        double turnSpeed = tag.getDouble("turnSpeed");
+        double movementSpeed = tag.getDouble("movementSpeed");
+        double lower = tag.getDouble("lowerThreshold");
+        double upper = tag.getDouble("upperThreshold");
+        double avoidR = tag.getDouble("avoidanceRadius");
+        double avoidS = tag.getDouble("avoidanceStrength");
+
+        int pointLife = tag.getInt("pointLife");
+        int lineLife = tag.getInt("lineLife");
+
+        float pointSize = tag.contains("pointSize") ? tag.getFloat("pointSize") : 0.25f;
+        float lineSize = tag.contains("lineSize") ? tag.getFloat("lineSize") : 0.1f;
+
+
+        int pointColor = tag.contains("pointColor") ? tag.getInt("pointColor") : 0x33DE98;
+
+
+        int lineColor = tag.contains("lineColor") ? tag.getInt("lineColor") : 0xFF6666;
+
+
+        float pr = ((pointColor >> 16) & 0xFF) / 255.0f;
+        float pg = ((pointColor >> 8) & 0xFF) / 255.0f;
+        float pb = (pointColor & 0xFF) / 255.0f;
+
+        float lr = ((lineColor >> 16) & 0xFF) / 255.0f;
+        float lg = ((lineColor >> 8) & 0xFF) / 255.0f;
+        float lb = (lineColor & 0xFF) / 255.0f;
 
         SphereData data = spheres.get(entityId);
         if (data == null) {
-            spheres.put(entityId, new SphereData(entityId, pos, radius, pointCount,
-                    turnSpeed, movementSpeed, lowerThreshold, upperThreshold,
-                    avoidR, avoidS));
-            //LOGGER.info("Created new sphere for entity {}", entityId);
+            data = new SphereData(entityId, pos, radius, pointCount, turnSpeed, movementSpeed,
+                    lower, upper, avoidR, avoidS,
+                    pointLife, pr, pg, pb, pointSize,
+                    lineLife, lr, lg, lb, lineSize);
+            spheres.put(entityId, data);
         } else {
             data.updateParams(pos, radius, turnSpeed, movementSpeed,
-                    lowerThreshold, upperThreshold, avoidR, avoidS);
-            //LOGGER.info("Updated sphere for entity {}", entityId);
+                    lower, upper, avoidR, avoidS,
+                    pointLife, pr, pg, pb, pointSize,
+                    lineLife, lr, lg, lb, lineSize);
         }
     }
 
     public static void tick(MinecraftClient client) {
         ClientWorld world = client.world;
         if (world == null) return;
-        //LOGGER.info("SphereRenderer.tick called, spheres={}", spheres.size());
 
         Iterator<Map.Entry<Integer, SphereData>> iter = spheres.entrySet().iterator();
         while (iter.hasNext()) {
@@ -55,13 +72,8 @@ public class SphereRenderer {
 
             if (world.getEntityById(id) == null) {
                 iter.remove();
-                //LOGGER.info("Removed sphere for entity {} (entity missing)", id);
             } else {
                 data.updateAndRender(world);
-                // Only log the first sphere per tick to avoid spam
-                if (id == spheres.keySet().iterator().next()) {
-                    //LOGGER.info("Rendering sphere for entity {}", id);
-                }
             }
         }
     }
@@ -71,13 +83,24 @@ public class SphereRenderer {
         BlockPos center;
         double radius, turnSpeed, movementSpeed;
         double lower, upper, avoidR, avoidS;
+
+        int pointLife;
+        float pr, pg, pb;
+
+        int lineLife;
+        float pointSize, lineSize;
+
+        float lr, lg, lb;
+
         List<Vec3d> positions;
         List<Vec3d> directions;
 
         SphereData(int entityId, BlockPos center, double radius, int count,
                    double turnSpeed, double movementSpeed,
                    double lower, double upper,
-                   double avoidR, double avoidS) {
+                   double avoidR, double avoidS,
+                   int pointLife, float pr, float pg, float pb, float pointSize,
+                   int lineLife, float lr, float lg, float lb, float lineSize) {
             this.entityId = entityId;
             this.center = center;
             this.radius = radius;
@@ -87,6 +110,16 @@ public class SphereRenderer {
             this.upper = upper;
             this.avoidR = avoidR;
             this.avoidS = avoidS;
+
+            this.pointSize = pointSize;
+            this.lineSize = lineSize;
+
+
+            this.pointLife = pointLife;
+            this.pr = pr; this.pg = pg; this.pb = pb;
+
+            this.lineLife = lineLife;
+            this.lr = lr; this.lg = lg; this.lb = lb;
 
             this.positions = new ArrayList<>(count);
             this.directions = new ArrayList<>(count);
@@ -101,7 +134,9 @@ public class SphereRenderer {
         void updateParams(BlockPos center, double radius,
                           double turnSpeed, double movementSpeed,
                           double lower, double upper,
-                          double avoidR, double avoidS) {
+                          double avoidR, double avoidS,
+                          int pointLife, float pr, float pg, float pb, float pointSize,
+                          int lineLife, float lr, float lg, float lb, float lineSize) {
             this.center = center;
             this.radius = radius;
             this.turnSpeed = turnSpeed;
@@ -110,6 +145,15 @@ public class SphereRenderer {
             this.upper = upper;
             this.avoidR = avoidR;
             this.avoidS = avoidS;
+
+            this.pointSize = pointSize;
+            this.lineSize = lineSize;
+
+            this.pointLife = pointLife;
+            this.pr = pr; this.pg = pg; this.pb = pb;
+
+            this.lineLife = lineLife;
+            this.lr = lr; this.lg = lg; this.lb = lb;
         }
 
         void updateAndRender(ClientWorld world) {
@@ -119,7 +163,7 @@ public class SphereRenderer {
                 Vec3d pos = positions.get(i);
                 Vec3d dir = directions.get(i);
 
-                world.addParticle(ParticleTypes.GLOW_SQUID_INK,
+                world.addParticle(new SphereParticleEffect(pr, pg, pb, pointSize, pointLife),
                         pos.x, pos.y, pos.z, 0, 0, 0);
 
                 Vec3d avoid = Vec3d.ZERO;
@@ -128,7 +172,7 @@ public class SphereRenderer {
                     double d = pos.distanceTo(other);
                     if (d < avoidR) {
                         Vec3d away = pos.subtract(other).normalize();
-                        avoid = avoid.add(away.multiply(1 - d/avoidR));
+                        avoid = avoid.add(away.multiply(1 - d / avoidR));
                     }
                 }
                 if (avoid.lengthSquared() > 0) {
@@ -151,15 +195,17 @@ public class SphereRenderer {
                 }
             }
         }
-    }
 
-    private static void drawProjectedLine(ClientWorld world, Vec3d c, Vec3d a, Vec3d b) {
-        Vec3d diff = b.subtract(a).multiply(1.0 / 10);
-        for (int i = 0; i <= 10; i++) {
-            Vec3d p = a.add(diff.multiply(i));
-            Vec3d offset = randomPerp(diff).multiply(0.3 * (random.nextDouble() - 0.5));
-            Vec3d proj = c.add(p.add(offset).subtract(c).normalize().multiply(c.distanceTo(p)));
-            world.addParticle(ParticleTypes.ELECTRIC_SPARK, proj.x, proj.y, proj.z, 0, 0, 0);
+        private void drawProjectedLine(ClientWorld world, Vec3d c, Vec3d a, Vec3d b) {
+            Vec3d diff = b.subtract(a).multiply(1.0 / 10);
+            for (int i = 0; i <= 10; i++) {
+                Vec3d p = a.add(diff.multiply(i));
+                Vec3d proj = c.add(p.subtract(c).normalize().multiply(c.distanceTo(p)));
+
+
+                world.addParticle(new SphereParticleEffect(lr, lg, lb, lineSize, lineLife),
+                        proj.x, proj.y, proj.z, 0, 0, 0);
+            }
         }
     }
 

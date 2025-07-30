@@ -14,7 +14,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class EndPortalMixin {
 	@Inject(method = "onEntityCollision", at = @At("HEAD"), cancellable = true)
 	private void disableEndTeleport(BlockState state, World world, BlockPos pos, Entity entity, CallbackInfo ci) {
-		// Cancel the portal teleportation entirely
 		ci.cancel();
 	}
 }

@@ -8,6 +8,7 @@ import net.minecraft.entity.EntityType;
 import net.minecraft.entity.ItemEntity;
 import net.minecraft.entity.SpawnGroup;
 import net.minecraft.item.ItemStack;
+import net.minecraft.particle.ParticleType;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.Identifier;
@@ -20,7 +21,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
-
 public class BCSMPStuff implements ModInitializer {
 
 	public static final String MOD_ID = "bcsmp-stuff";
@@ -29,28 +29,32 @@ public class BCSMPStuff implements ModInitializer {
 	public static final EntityType<ProtectionSphereEntity> PROTECTION_SPHERE =
 			Registry.register(Registry.ENTITY_TYPE, new Identifier(MOD_ID, "protection_sphere"),
 					FabricEntityTypeBuilder.<ProtectionSphereEntity>create(SpawnGroup.MISC, ProtectionSphereEntity::new)
-							.dimensions(EntityDimensions.fixed(0.1f, 0.1f)) // effectively invisible
+							.dimensions(EntityDimensions.fixed(0.1f, 0.1f))
 							.trackRangeChunks(10)
 							.trackedUpdateRate(20)
 							.build());
 
+	public static final ParticleType<SphereParticleEffect> SPHERE_PARTICLE_TYPE =
+			new SphereParticleType();
+
 	@Override
 	public void onInitialize() {
+		Registry.register(Registry.PARTICLE_TYPE, new Identifier(MOD_ID, "sphere_particle"), SPHERE_PARTICLE_TYPE);
 		ModItems.registerModItems();
 		ModBlocks.registerModBlocks();
 		ModSounds.registerModSounds();
 
 		// DEBUG: Spawn a test ProtectionSphereEntity at 0, 100, 0 in the overworld
-		ServerTickEvents.END_WORLD_TICK.register(world -> {
-			if (!(world instanceof ServerWorld)) return;
-			ServerWorld serverWorld = (ServerWorld) world;
-			if (serverWorld.getTime() == 20) { // Only once, after 1 second
-				ProtectionSphereEntity entity = new ProtectionSphereEntity(PROTECTION_SPHERE, serverWorld);
-				entity.refreshPositionAndAngles(0, 100, 0, 0, 0);
-				serverWorld.spawnEntity(entity);
-				SphereNetworking.sendSphereSettings(entity);
-			}
-		});
+		//ServerTickEvents.END_WORLD_TICK.register(world -> {
+		//	if (!(world instanceof ServerWorld)) return;
+		//	ServerWorld serverWorld = (ServerWorld) world;
+		//	if (serverWorld.getTime() == 20) { // Only once, after 1 second
+		//		ProtectionSphereEntity entity = new ProtectionSphereEntity(PROTECTION_SPHERE, serverWorld);
+		//		entity.refreshPositionAndAngles(0, 100, 0, 0, 0);
+		//		serverWorld.spawnEntity(entity);
+		//		SphereNetworking.sendSphereSettings(entity);
+		//	}
+		//});
 
 		ServerTickEvents.END_WORLD_TICK.register(world -> {
 			if (!(world instanceof ServerWorld)) return;
@@ -65,13 +69,13 @@ public class BCSMPStuff implements ModInitializer {
 
 			ServerPlayerEntity player = players.get(random.nextInt(players.size()));
 
-			double x = player.getX() + (random.nextDouble() * 20.0) - 10.0;
-			double z = player.getZ() + (random.nextDouble() * 20.0) - 10.0;
+			double x = player.getX() + (random.nextDouble() * 60.0) - 30.0;
+			double z = player.getZ() + (random.nextDouble() * 60.0) - 30.0;
 			double y = 321.0;
 
 			ItemStack stack = new ItemStack(ModItems.SKYGLEAM);
 			ItemEntity drop = new ItemEntity(serverWorld, x, y, z, stack);
-			drop.setVelocity(0, -5.0, 0);
+			//drop.setVelocity(0, -5.0, 0);
 			serverWorld.spawnEntity(drop);
 		});
 	}

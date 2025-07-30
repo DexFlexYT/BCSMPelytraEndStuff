@@ -7,8 +7,6 @@ import net.minecraft.network.Packet;
 import net.minecraft.network.packet.s2c.play.EntitySpawnS2CPacket;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.world.World;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class ProtectionSphereEntity extends Entity {
     // Default values
@@ -21,12 +19,16 @@ public class ProtectionSphereEntity extends Entity {
     public double avoidanceRadius = 4.0;
     public double avoidanceStrength = 0.2;
 
-    //private static final Logger LOGGER = LoggerFactory.getLogger("ProtectionSphereEntity");
+    public int pointColor = 0x33DE98;
+    public int lineColor = 0xFFFFFF;
+    public float pointSize = 1.0f;
+    public float lineSize = 0.1f;
+    public int pointLife = 15;
+    public int lineLife = 1;
 
     public ProtectionSphereEntity(EntityType<? extends ProtectionSphereEntity> type, World world) {
         super(type, world);
         this.noClip = true;
-        //LOGGER.info("ProtectionSphereEntity constructed: id={}, world={}", this.getId(), world.isClient ? "client" : "server");
     }
 
     @Override
@@ -47,6 +49,13 @@ public class ProtectionSphereEntity extends Entity {
         tag.putDouble("upperThreshold", upperThreshold);
         tag.putDouble("avoidanceRadius", avoidanceRadius);
         tag.putDouble("avoidanceStrength", avoidanceStrength);
+
+        tag.putInt("pointColor", pointColor);
+        tag.putInt("lineColor", lineColor);
+        tag.putFloat("pointSize", pointSize);
+        tag.putFloat("lineSize", lineSize);
+        tag.putInt("pointLife", pointLife);
+        tag.putInt("lineLife", lineLife);
     }
 
     @Override
@@ -59,12 +68,21 @@ public class ProtectionSphereEntity extends Entity {
         if (tag.contains("upperThreshold")) upperThreshold = tag.getDouble("upperThreshold");
         if (tag.contains("avoidanceRadius")) avoidanceRadius = tag.getDouble("avoidanceRadius");
         if (tag.contains("avoidanceStrength")) avoidanceStrength = tag.getDouble("avoidanceStrength");
+
+        if (tag.contains("pointColor")) pointColor = tag.getInt("pointColor");
+        if (tag.contains("lineColor")) lineColor = tag.getInt("lineColor");
+        if (tag.contains("pointSize")) pointSize = tag.getFloat("pointSize");
+        if (tag.contains("lineSize")) lineSize = tag.getFloat("lineSize");
+        if (tag.contains("pointLife")) pointLife = tag.getInt("pointLife");
+        if (tag.contains("lineLife")) lineLife = tag.getInt("lineLife");
     }
 
     @Override
     public boolean shouldSave() { return true; }
+
     @Override
     public boolean isInvisible() { return true; }
+
     @Override
     public boolean isSpectator() { return true; }
 
@@ -76,4 +94,3 @@ public class ProtectionSphereEntity extends Entity {
         }
     }
 }
-
