@@ -9,8 +9,10 @@ import org.dexflex.bcsmpstuff.BCSMPStuff;
 public class ModItems {
     public static final Item SKYGLEAM = registerItem("skygleam",
             new Item(new FabricItemSettings()));
+    public static final Item THORNLASH = registerItem("thornlash",
+            new ThornlashItem(new FabricItemSettings().maxCount(1)));
 
-
+    
 
     private static Item registerItem(String name, Item item) {
         return Registry.register(Registry.ITEM, new Identifier(BCSMPStuff.MOD_ID, name), item);

@@ -3,11 +3,13 @@ package org.dexflex.bcsmpstuff;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerTickEvents;
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricEntityTypeBuilder;
+import net.fabricmc.fabric.api.particle.v1.FabricParticleTypes;
 import net.minecraft.entity.EntityDimensions;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.ItemEntity;
 import net.minecraft.entity.SpawnGroup;
 import net.minecraft.item.ItemStack;
+import net.minecraft.particle.DefaultParticleType;
 import net.minecraft.particle.ParticleType;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
@@ -16,8 +18,10 @@ import net.minecraft.util.math.random.Random;
 import net.minecraft.util.registry.Registry;
 import org.dexflex.bcsmpstuff.block.ModBlocks;
 import org.dexflex.bcsmpstuff.item.ModItems;
+import org.dexflex.bcsmpstuff.item.ThornlashItem;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 
 import java.util.List;
 
@@ -36,26 +40,20 @@ public class BCSMPStuff implements ModInitializer {
 
 	public static final ParticleType<SphereParticleEffect> SPHERE_PARTICLE_TYPE =
 			new SphereParticleType();
+	public static final ParticleType<DefaultParticleType> THORNLASH_LINE_PARTICLE_TYPE =
+			FabricParticleTypes.simple();
+
 
 	@Override
 	public void onInitialize() {
 		Registry.register(Registry.PARTICLE_TYPE, new Identifier(MOD_ID, "sphere_particle"), SPHERE_PARTICLE_TYPE);
+		Registry.register(Registry.PARTICLE_TYPE, new Identifier(MOD_ID, "thornlash_line"), THORNLASH_LINE_PARTICLE_TYPE);
+
 		ModItems.registerModItems();
 		ModBlocks.registerModBlocks();
 		ModSounds.registerModSounds();
 
-		// DEBUG: Spawn a test ProtectionSphereEntity at 0, 100, 0 in the overworld
-		//ServerTickEvents.END_WORLD_TICK.register(world -> {
-		//	if (!(world instanceof ServerWorld)) return;
-		//	ServerWorld serverWorld = (ServerWorld) world;
-		//	if (serverWorld.getTime() == 20) { // Only once, after 1 second
-		//		ProtectionSphereEntity entity = new ProtectionSphereEntity(PROTECTION_SPHERE, serverWorld);
-		//		entity.refreshPositionAndAngles(0, 100, 0, 0, 0);
-		//		serverWorld.spawnEntity(entity);
-		//		SphereNetworking.sendSphereSettings(entity);
-		//	}
-		//});
-
+		// Existing rain item drop code omitted for brevity, keep as is
 		ServerTickEvents.END_WORLD_TICK.register(world -> {
 			if (!(world instanceof ServerWorld)) return;
 			ServerWorld serverWorld = (ServerWorld) world;
@@ -78,5 +76,14 @@ public class BCSMPStuff implements ModInitializer {
 			//drop.setVelocity(0, -5.0, 0);
 			serverWorld.spawnEntity(drop);
 		});
+
+		// Register Thornlash pulling logic per player every server tick
+		ServerTickEvents.END_SERVER_TICK.register(server -> {
+			for (ServerPlayerEntity player : server.getPlayerManager().getPlayerList()) {
+				ThornlashItem.tickPulling(player);
+			}
+		});
+
+		LOGGER.info("BCSMPStuff initialized");
 	}
 }

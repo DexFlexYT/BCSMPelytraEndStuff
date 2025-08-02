@@ -3,7 +3,8 @@
 	"package": "org.dexflex.bcsmpstuff.mixin",
 	"compatibilityLevel": "JAVA_17",
 	"mixins": [
-		"EndPortalMixin"
+		"EndPortalMixin",
+		"PlayerEntityMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1

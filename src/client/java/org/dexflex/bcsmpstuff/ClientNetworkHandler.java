@@ -15,6 +15,11 @@ public class ClientNetworkHandler implements ClientModInitializer {
                 BCSMPStuff.SPHERE_PARTICLE_TYPE,
                 spriteProvider -> new SphereParticle.Factory(spriteProvider)
         );
+        ParticleFactoryRegistry.getInstance().register(
+                BCSMPStuff.THORNLASH_LINE_PARTICLE_TYPE,
+                spriteProvider -> new ThornlashLineParticle.Factory(spriteProvider)
+        );
+
 
         ClientPlayNetworking.registerGlobalReceiver(
                 SphereNetworking.SPHERE_UPDATE_PACKET,
