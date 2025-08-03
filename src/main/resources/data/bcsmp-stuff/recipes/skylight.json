@@ -1,0 +1,20 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "pattern": [
+        " / ",
+        "/S/",
+        " / "
+    ],
+    "key": {
+        "/": {
+            "item": "minecraft:stick"
+        },
+        "S": {
+            "item": "bcsmp-stuff:skygleam"
+        }
+    },
+    "result": {
+        "item": "bcsmp-stuff:skylight",
+        "count": 1
+    }
+}

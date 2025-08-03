@@ -1,4 +1,4 @@
-package org.dexflex.bcsmpstuff;
+package org.dexflex.bcsmpstuff.particle;
 
 import net.minecraft.client.particle.*;
 import net.minecraft.client.world.ClientWorld;

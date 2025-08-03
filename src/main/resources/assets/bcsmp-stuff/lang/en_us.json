@@ -1,5 +1,10 @@
 {
   "block.bcsmp-stuff.skylight": "Skylight",
   "item.bcsmp-stuff.skygleam": "Skygleam",
-  "item.bcsmp-stuff.thornlash": "Thornlash"
+  "item.bcsmp-stuff.thornlash": "Thornlash",
+  "block.bcsmp-stuff.inkflower": "InkFlower",
+  "block.bcsmp-stuff.eclipseflower": "EclipseFlower",
+  "entity.bcsmp-stuff.protection_sphere": "Protection Sphere",
+  "itemGroup.bcsmp-stuff.bcsmp-stuff": "BCSMP Stuff"
+
 }

@@ -1,0 +1,15 @@
+{
+  "variants": {
+    "facing=south,half=lower": { "model": "bcsmp-stuff:block/eclipseflower_bottom", "y": 180 },
+    "facing=south,half=upper": { "model": "bcsmp-stuff:block/eclipseflower_top", "y": 180 },
+
+    "facing=north,half=lower": { "model": "bcsmp-stuff:block/eclipseflower_bottom" },
+    "facing=north,half=upper": { "model": "bcsmp-stuff:block/eclipseflower_top" },
+
+    "facing=west,half=lower": { "model": "bcsmp-stuff:block/eclipseflower_bottom", "y": 270 },
+    "facing=west,half=upper": { "model": "bcsmp-stuff:block/eclipseflower_top", "y": 270 },
+
+    "facing=east,half=lower": { "model": "bcsmp-stuff:block/eclipseflower_bottom", "y": 90 },
+    "facing=east,half=upper": { "model": "bcsmp-stuff:block/eclipseflower_top", "y": 90 }
+  }
+}

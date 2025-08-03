@@ -5,6 +5,8 @@ import net.minecraft.client.world.ClientWorld;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Vec3d;
+import net.minecraft.util.math.Vec3f;
+import org.dexflex.bcsmpstuff.particle.SphereParticleEffect;
 
 import java.util.*;
 
@@ -163,7 +165,7 @@ public class SphereRenderer {
                 Vec3d pos = positions.get(i);
                 Vec3d dir = directions.get(i);
 
-                world.addParticle(new SphereParticleEffect(pr, pg, pb, pointSize, pointLife),
+                world.addParticle(new SphereParticleEffect(new Vec3f(pr, pg, pb), pointSize, pointLife),
                         pos.x, pos.y, pos.z, 0, 0, 0);
 
                 Vec3d avoid = Vec3d.ZERO;
@@ -203,7 +205,7 @@ public class SphereRenderer {
                 Vec3d proj = c.add(p.subtract(c).normalize().multiply(c.distanceTo(p)));
 
 
-                world.addParticle(new SphereParticleEffect(lr, lg, lb, lineSize, lineLife),
+                world.addParticle(new SphereParticleEffect(new Vec3f(lr, lg, lb), lineSize, lineLife),
                         proj.x, proj.y, proj.z, 0, 0, 0);
             }
         }

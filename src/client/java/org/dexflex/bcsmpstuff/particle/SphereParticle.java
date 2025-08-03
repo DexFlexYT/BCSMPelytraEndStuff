@@ -1,7 +1,8 @@
-package org.dexflex.bcsmpstuff;
+package org.dexflex.bcsmpstuff.particle;
 
 import net.minecraft.client.particle.*;
 import net.minecraft.client.world.ClientWorld;
+import net.minecraft.util.math.Vec3f;
 
 public class SphereParticle extends SpriteBillboardParticle {
     private final float initialScale;
@@ -45,7 +46,9 @@ public class SphereParticle extends SpriteBillboardParticle {
 
         @Override
         public Particle createParticle(SphereParticleEffect effect, ClientWorld world, double x, double y, double z, double dx, double dy, double dz) {
-            return new SphereParticle(world, x, y, z, effect.r(), effect.g(), effect.b(), effect.size(), effect.lifetime(), spriteProvider);
+            Vec3f c = effect.color();
+            return new SphereParticle(world, x, y, z, c.getX(), c.getY(), c.getZ(), effect.size(), effect.lifetime(), spriteProvider);
+
         }
     }
 }
