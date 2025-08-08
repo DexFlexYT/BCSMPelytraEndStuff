@@ -11,6 +11,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.util.math.random.Random;
 import net.minecraft.util.registry.Registry;
 import org.dexflex.bcsmpstuff.block.ModBlocks;
@@ -21,12 +22,17 @@ import org.dexflex.bcsmpstuff.particle.ModParticles;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class BCSMPStuff implements ModInitializer {
 
 	public static final String MOD_ID = "bcsmp-stuff";
 	public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
+
+	public static final Map<ServerPlayerEntity, Vec3d> previousPositions = new HashMap<>();
+	public static final Map<ServerPlayerEntity, Double> playerSpeeds = new HashMap<>();
 
 	public static final EntityType<ProtectionSphereEntity> PROTECTION_SPHERE =
 			Registry.register(Registry.ENTITY_TYPE, new Identifier(MOD_ID, "protection_sphere"),
@@ -36,7 +42,6 @@ public class BCSMPStuff implements ModInitializer {
 							.trackedUpdateRate(20)
 							.build());
 
-
 	@Override
 	public void onInitialize() {
 		ModParticles.registerModParticles();
@@ -45,7 +50,6 @@ public class BCSMPStuff implements ModInitializer {
 		ModBlocks.registerModBlocks();
 		ModSounds.registerModSounds();
 
-		// Existing rain item drop code omitted for brevity, keep as is
 		ServerTickEvents.END_WORLD_TICK.register(world -> {
 			if (!(world instanceof ServerWorld)) return;
 			ServerWorld serverWorld = world;
@@ -65,13 +69,17 @@ public class BCSMPStuff implements ModInitializer {
 
 			ItemStack stack = new ItemStack(ModItems.SKYGLEAM);
 			ItemEntity drop = new ItemEntity(serverWorld, x, y, z, stack);
-			//drop.setVelocity(0, -5.0, 0);
 			serverWorld.spawnEntity(drop);
 		});
 
-		// Register Thornlash pulling logic per player every server tick
 		ServerTickEvents.END_SERVER_TICK.register(server -> {
 			for (ServerPlayerEntity player : server.getPlayerManager().getPlayerList()) {
+				Vec3d prevPos = previousPositions.getOrDefault(player, player.getPos());
+				Vec3d currentPos = player.getPos();
+				double speed = currentPos.distanceTo(prevPos);
+				playerSpeeds.put(player, speed);
+				previousPositions.put(player, currentPos);
+
 				ThornlashItem.tickPulling(player);
 			}
 		});
