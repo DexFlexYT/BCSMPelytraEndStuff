@@ -4,6 +4,7 @@ import net.minecraft.block.*;
 import net.minecraft.block.enums.DoubleBlockHalf;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.ItemPlacementContext;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.DirectionProperty;
 import net.minecraft.state.property.EnumProperty;
@@ -50,12 +51,11 @@ public class InkFlowerBlock extends TallPlantBlock {
 
     @Override
     public void randomDisplayTick(BlockState state, World world, BlockPos pos, Random random) {
-        if (state.get(HALF) == DoubleBlockHalf.UPPER && random.nextFloat()*.5f < 0.1f) {
-            double x = pos.getX() + 0.5 + (random.nextFloat() - 0.5) * 0.45;
+        if (state.get(HALF) == DoubleBlockHalf.UPPER && random.nextFloat() * 0.35f < 0.1f) {
+            double x = pos.getX() + 0.5 + (random.nextFloat() - 0.4);
             double y = pos.getY() + 0.3;
-            double z = pos.getZ() + 0.5 + (random.nextFloat() - 0.5) * 0.45;
-
-            world.addParticle(ModParticles.INKFLOWER_SEEDS, x, y, z, 0, .02, 0);
+            double z = pos.getZ() + 0.5 + (random.nextFloat() - 0.4);
+            world.addParticle(ModParticles.INKFLOWER_SEEDS, x, y, z, 0, 0.02, 0);
         }
     }
 
@@ -79,11 +79,13 @@ public class InkFlowerBlock extends TallPlantBlock {
                                                 WorldAccess world, BlockPos pos, BlockPos neighborPos) {
         DoubleBlockHalf half = state.get(HALF);
 
+
         if (direction.getAxis() == Direction.Axis.Y) {
             if (half == DoubleBlockHalf.LOWER && direction == Direction.UP &&
                     (!neighborState.isOf(this) || neighborState.get(HALF) != DoubleBlockHalf.UPPER)) {
                 return Blocks.AIR.getDefaultState();
             }
+
 
             if (half == DoubleBlockHalf.UPPER && direction == Direction.DOWN &&
                     (!neighborState.isOf(this) || neighborState.get(HALF) != DoubleBlockHalf.LOWER)) {
@@ -91,11 +93,28 @@ public class InkFlowerBlock extends TallPlantBlock {
             }
         }
 
-        // Survival check (break if not valid position)
+
         if (!this.canPlaceAt(state, world, pos)) {
             return Blocks.AIR.getDefaultState();
         }
 
+
         return state;
+    }
+
+
+    @Override
+    public void randomTick(BlockState state, ServerWorld world, BlockPos pos, Random random) {
+        if (state.get(HALF) != DoubleBlockHalf.LOWER) return;
+
+
+// Prevent eclipsing if on soul soil
+        BlockState below = world.getBlockState(pos.down());
+        if (below.isOf(Blocks.SOUL_SOIL)) return;
+
+
+        if (!world.isDay() && world.getMoonPhase() == 4 && random.nextFloat() < 0.25f) {
+            EclipseFlowerBlock.replaceWithConversion(world, pos, state.get(FACING),random);
+        }
     }
 }

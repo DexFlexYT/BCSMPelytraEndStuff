@@ -49,16 +49,16 @@ public class BCSMPStuff implements ModInitializer {
 		ModItemGroup.registerItemGroups();
 		ModBlocks.registerModBlocks();
 		ModSounds.registerModSounds();
+		ModEvents.registerEvents();
 
 		ServerTickEvents.END_WORLD_TICK.register(world -> {
 			if (!(world instanceof ServerWorld)) return;
-			ServerWorld serverWorld = world;
-			if (!serverWorld.isRaining() && !serverWorld.isThundering()) return;
+            if (!world.isRaining() && !world.isThundering()) return;
 
-			Random random = serverWorld.getRandom();
+			Random random = world.getRandom();
 			if (random.nextInt(5000) != 0) return;
 
-			List<ServerPlayerEntity> players = serverWorld.getPlayers(player -> true);
+			List<ServerPlayerEntity> players = world.getPlayers(player -> true);
 			if (players.isEmpty()) return;
 
 			ServerPlayerEntity player = players.get(random.nextInt(players.size()));
@@ -68,8 +68,8 @@ public class BCSMPStuff implements ModInitializer {
 			double y = 321.0;
 
 			ItemStack stack = new ItemStack(ModItems.SKYGLEAM);
-			ItemEntity drop = new ItemEntity(serverWorld, x, y, z, stack);
-			serverWorld.spawnEntity(drop);
+			ItemEntity drop = new ItemEntity(world, x, y, z, stack);
+			world.spawnEntity(drop);
 		});
 
 		ServerTickEvents.END_SERVER_TICK.register(server -> {

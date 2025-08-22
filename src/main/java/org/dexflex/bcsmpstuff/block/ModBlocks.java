@@ -20,10 +20,12 @@ public class ModBlocks {
             new SkylightBlock(FabricBlockSettings.of(Material.METAL).strength(4f).requiresTool()), ModItemGroup.BCSMP_GROUP);
 
     public static final Block INK_FLOWER = registerBlock("inkflower",
-            new InkFlowerBlock(FabricBlockSettings.copyOf(Blocks.SUNFLOWER).nonOpaque().noCollision()), ModItemGroup.BCSMP_GROUP);
+            new InkFlowerBlock(FabricBlockSettings.copyOf(Blocks.SUNFLOWER).ticksRandomly().nonOpaque()),
+            ModItemGroup.BCSMP_GROUP);
 
     public static final Block ECLIPSE_FLOWER = registerBlock("eclipseflower",
-            new EclipseFlowerBlock(FabricBlockSettings.copyOf(Blocks.SUNFLOWER).nonOpaque().noCollision()), ModItemGroup.BCSMP_GROUP);
+            new EclipseFlowerBlock(FabricBlockSettings.copyOf(Blocks.SUNFLOWER).ticksRandomly().nonOpaque()),
+            ModItemGroup.BCSMP_GROUP);
 
 
 

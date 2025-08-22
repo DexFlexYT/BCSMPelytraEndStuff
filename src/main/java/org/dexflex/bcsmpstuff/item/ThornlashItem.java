@@ -13,7 +13,7 @@ import net.minecraft.server.network.ServerPlayerEntity;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
-import net.minecraft.tag.BlockTags;
+import net.minecraft.entity.player.ItemCooldownManager;
 import net.minecraft.util.Hand;
 import net.minecraft.util.TypedActionResult;
 import net.minecraft.util.hit.BlockHitResult;
@@ -26,6 +26,7 @@ import net.minecraft.world.RaycastContext;
 import net.minecraft.world.World;
 import org.dexflex.bcsmpstuff.BCSMPStuff;
 import org.dexflex.bcsmpstuff.particle.ModParticles;
+import org.dexflex.bcsmpstuff.tags.ModTags;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -40,13 +41,17 @@ public class ThornlashItem extends Item {
 
     @Override
     public TypedActionResult<ItemStack> use(World world, PlayerEntity player, Hand hand) {
+        ItemCooldownManager cooldownManager = player.getItemCooldownManager();
         ItemStack stack = player.getStackInHand(hand);
         if (isLashing(stack)) {
             clearLash(stack);
+            cooldownManager.set(this, 20);
             world.playSound(null, player.getBlockPos(), SoundEvents.BLOCK_CHAIN_BREAK, SoundCategory.PLAYERS, 1.0f, 1.2f);
             return TypedActionResult.success(stack, world.isClient());
         }
-
+        if (cooldownManager.isCoolingDown(this)) {
+            return TypedActionResult.fail(stack);
+        }
         HitResult hitResult = raycast(world, player, 64.0);
         if (hitResult != null) handleHit(world, player, stack, hitResult);
 
@@ -58,16 +63,19 @@ public class ThornlashItem extends Item {
         if (hitResult.getType() == HitResult.Type.ENTITY) {
             Entity target = ((EntityHitResult) hitResult).getEntity();
             if (target instanceof LivingEntity victim && !world.isClient) {
+                NbtCompound nbt = stack.getOrCreateNbt();
                 victim.damage(DamageSource.player(player), 0.1f);
                 setLashing(stack, true);
-                stack.getOrCreateNbt().putUuid("ThornlashTarget", target.getUuid());
+                nbt.putUuid("ThornlashTarget", target.getUuid());
+
+
                 world.playSound(null, player.getBlockPos(), SoundEvents.ENTITY_LEASH_KNOT_PLACE, SoundCategory.PLAYERS, 2.0f, 0.7f);
             }
         } else if (hitResult.getType() == HitResult.Type.BLOCK) {
             BlockHitResult bhr = (BlockHitResult) hitResult;
             BlockPos pos = bhr.getBlockPos();
             Block block = world.getBlockState(pos).getBlock();
-            if (block.getRegistryEntry().isIn(BlockTags.LOGS)) {
+            if (block.getRegistryEntry().isIn(ModTags.THORNLASHABLE)) {
                 setLashing(stack, true);
                 stack.getOrCreateNbt().putLong("ThornlashTargetBlock", pos.asLong());
                 world.playSound(null, player.getBlockPos(), SoundEvents.ENTITY_LEASH_KNOT_PLACE, SoundCategory.PLAYERS, 2.0f, 0.7f);
@@ -79,9 +87,17 @@ public class ThornlashItem extends Item {
         ItemStack activeStack = null;
         for (int i = 0; i < player.getInventory().size(); i++) {
             ItemStack stack = player.getInventory().getStack(i);
-            if (stack.getItem() instanceof ThornlashItem && isLashing(stack)) {
-                activeStack = stack;
-                break;
+            if (stack.getItem() instanceof ThornlashItem) {
+                NbtCompound nbt = stack.getOrCreateNbt();
+                if (nbt.contains("ThornlashCooldown")) {
+                    int cd = nbt.getInt("ThornlashCooldown");
+                    if (cd > 0) nbt.putInt("ThornlashCooldown", cd - 1);
+                }
+
+                if (isLashing(stack)) {
+                    activeStack = stack;
+                    break;
+                }
             }
         }
         if (activeStack == null) return;
@@ -90,7 +106,7 @@ public class ThornlashItem extends Item {
 
         Vec3d playerPos = player.getPos();
         Vec3d targetPos;
-        UUID targetUUID = null;
+        UUID targetUUID;
         Entity entityTarget = null;
 
         if (nbt.contains("ThornlashTarget")) {
@@ -115,10 +131,8 @@ public class ThornlashItem extends Item {
         }
 
         if (entityTarget != null && player.isSneaking()) {
-            // Pull entity to player
             pullEntityToward(entityTarget, player.getPos());
         } else {
-            // Pull player to target
             pullPlayerToward(player, targetPos);
         }
 
@@ -133,7 +147,7 @@ public class ThornlashItem extends Item {
             }
         }
 
-        if (entityTarget != null && player != null) {
+        if (entityTarget != null) {
             double maxDistance = 64.0;
             double distance = entityTarget.getPos().distanceTo(player.getPos());
 
@@ -141,7 +155,6 @@ public class ThornlashItem extends Item {
                 cancelPull(entityTarget);
                 cancelPull(player);
                 player.world.playSound(null, player.getBlockPos(), SoundEvents.BLOCK_CHAIN_BREAK, SoundCategory.PLAYERS, 1.0f, 0.8f);
-                return;
             }
         }
 
@@ -228,7 +241,7 @@ public class ThornlashItem extends Item {
         int steps = Math.min(100, (int) (len / 0.3));
         for (int i = 0; i <= steps; i++) {
             Vec3d pt = eye.add(delta.multiply((double) i / steps));
-            world.spawnParticles((DefaultParticleType) ModParticles.THORNLASH_LINE_PARTICLE_TYPE, pt.x, pt.y, pt.z, 1, 0, 0, 0, 0);
+            world.spawnParticles(ModParticles.THORNLASH_LINE_PARTICLE_TYPE, pt.x, pt.y, pt.z, 1, 0, 0, 0, 0);
         }
     }
 
